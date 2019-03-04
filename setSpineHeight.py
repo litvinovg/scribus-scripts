@@ -25,14 +25,15 @@ for item in pageItems:
 		scribus.moveObject(-halfHeightDiff, 0 , item[0])
 		if item[0] == 'left_background':
 			Xsize,Ysize = scribus.getSize(item[0])
-			scribus.sizeObject(Xsize + halfHeightDiff, Ysize, item[0])
+			scribus.sizeObject(PageX/2 - X + halfHeightDiff + 0.1 , Ysize, item[0])
 	if item[0].startswith('right_'):
 		if item[0] == 'right_background':
 			Xsize,Ysize = scribus.getSize(item[0])
 			scribus.sizeObject(Xsize + halfHeightDiff, Ysize, item[0])
+			scribus.moveObjectAbs(PageX/2 -0.1, Y ,item[0])
 		else:
 			scribus.moveObject(halfHeightDiff, 0 , item[0])
-	if item[0] == 'spine_book':
+	if item[0].startswith('spine_logo'):
 		Xsize,Ysize = scribus.getSize(item[0])
 		newBookX = newHeight - 2
 		multiplier = newBookX/Xsize
@@ -40,3 +41,5 @@ for item in pageItems:
 		scribus.sizeObject(newBookX, newBooKY, item[0])
 		scribus.moveObjectAbs(PageX/2 - newBookX/2 , Y ,item[0])
 scribus.setVGuides([(PageX/2), (PageX/2 + newHeight/2), (PageX/2 - newHeight/2)])
+
+
