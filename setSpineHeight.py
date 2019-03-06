@@ -13,6 +13,7 @@ except ImportError:
     sys.exit(1)
 newSpineHeight = scribus.valueDialog('Задание высоты корешка','Введите новую высоту корешка')
 
+hasSpineBackground = False
 #set units to mm
 scribus.setUnit(1)
 PageX,PageY = scribus.getPageSize()
@@ -25,17 +26,35 @@ halfHeightDiff = spineHeightDiff / 2
 
 pageItems = scribus.getPageItems()
 for item in pageItems:
+	if item[0].startswith('spine_background'):
+		X,Y = scribus.getPosition(item[0])
+		hasSpineBackground = True
+		Xsize,Ysize = scribus.getSize(item[0])
+		scribus.sizeObject(newHeight, Ysize, item[0])
+		scribus.moveObjectAbs(PageX/2 - newHeight/2, Y ,item[0])
+	
+for item in pageItems:
 	X,Y = scribus.getPosition(item[0])
 	if item[0].startswith('left_'):
 		scribus.moveObject(-halfHeightDiff, 0 , item[0])
 		if item[0].startswith('left_background'):
 			Xsize,Ysize = scribus.getSize(item[0])
-			scribus.sizeObject(PageX/2 - X + halfHeightDiff + 0.1 , Ysize, item[0])
+			leftBackgroundSize = PageX/2 - X + halfHeightDiff + 0.1 
+			if hasSpineBackground:
+				leftBackgroundSize -=  newHeight/2
+			scribus.sizeObject(leftBackgroundSize, Ysize, item[0])
 	if item[0].startswith('right_'):
 		if item[0].startswith('right_background'):
 			Xsize,Ysize = scribus.getSize(item[0])
-			scribus.sizeObject(Xsize + halfHeightDiff, Ysize, item[0])
-			scribus.moveObjectAbs(PageX/2 -0.1, Y ,item[0])
+			rightBackgroundSize = Xsize + halfHeightDiff
+			if hasSpineBackground:
+				rightBackgroundSize -=  halfHeightDiff
+			scribus.sizeObject(rightBackgroundSize, Ysize, item[0])
+			rightBackgroundX = PageX/2 -0.1
+# Start after spine ends
+			if hasSpineBackground:
+				rightBackgroundX +=  newHeight/2	
+			scribus.moveObjectAbs(rightBackgroundX, Y ,item[0])
 		else:
 			scribus.moveObject(halfHeightDiff, 0 , item[0])
 	if item[0].startswith('spine_logo'):
@@ -45,6 +64,7 @@ for item in pageItems:
 		newBooKY = Ysize * multiplier
 		scribus.sizeObject(newBookX, newBooKY, item[0])
 		scribus.moveObjectAbs(PageX/2 - newBookX/2 , Y ,item[0])
+
 scribus.setVGuides([(PageX/2), (PageX/2 + newHeight/2), (PageX/2 - newHeight/2)])
 
 
