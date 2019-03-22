@@ -35,11 +35,16 @@ for item in pageItems:
 	
 for item in pageItems:
 	X,Y = scribus.getPosition(item[0])
+	if item[0].startswith('background'):
+		scribus.moveObject(-halfWidthDiff, 0 , item[0])
+		Xsize,Ysize = scribus.getSize(item[0])
+		backgroundSize = Xsize + spineWidthDiff 
+		scribus.sizeObject(backgroundSize, Ysize, item[0])
 	if item[0].startswith('left_'):
 		scribus.moveObject(-halfWidthDiff, 0 , item[0])
 		if item[0].startswith('left_background'):
 			Xsize,Ysize = scribus.getSize(item[0])
-			leftBackgroundSize = PageX/2 - X + halfWidthDiff + 0.1 
+			leftBackgroundSize = PageX/2 - X + halfWidthDiff + 0.05 
 			if hasSpineBackground:
 				leftBackgroundSize -=  newWidth/2
 			scribus.sizeObject(leftBackgroundSize, Ysize, item[0])
@@ -50,7 +55,7 @@ for item in pageItems:
 			if hasSpineBackground:
 				rightBackgroundSize -=  halfWidthDiff
 			scribus.sizeObject(rightBackgroundSize, Ysize, item[0])
-			rightBackgroundX = PageX/2 -0.1
+			rightBackgroundX = PageX/2 -0.05
 # Start after spine ends
 			if hasSpineBackground:
 				rightBackgroundX +=  newWidth/2	
