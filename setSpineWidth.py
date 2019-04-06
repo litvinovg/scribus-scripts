@@ -14,6 +14,21 @@ except ImportError:
     print "Unable to import the 'scribus' module. This script will only run within"
     print "the Python interpreter embedded in Scribus. Try Script->Execute Script."
     sys.exit(1)
+
+hasSpineBackground = False
+hasLeftTopMark = False
+hasRightTopMark = False
+pageItems = scribus.getPageItems()
+
+for item in pageItems:
+	if item[0].startswith('left_top_mark'):
+		hasLeftTopMark = True
+	if item[0].startswith('right_top_mark'):
+		hasRightTopMark = True
+if not hasLeftTopMark or not hasRightTopMark:
+	scribus.messageBox('Error', "Document should have left_top_mark and right_top_mark to measure current spine width. Read more at https://litvinovg.pro/scribus-spine-width.html",  scribus.ICON_WARNING, scribus.BUTTON_OK)
+	sys.exit(1)
+
 newSpineWidth = scribus.valueDialog('Spine width','Set spine width in mm.')
 if newSpineWidth == "0":
 	scribus.messageBox('Error', "Spine width could not be zero.",  scribus.ICON_WARNING, scribus.BUTTON_OK)
@@ -22,7 +37,8 @@ newWidth = float(newSpineWidth.replace(',','.'))
 if newWidth < 0:
 	scribus.messageBox('Error', "Spine width could not be negative",  scribus.ICON_WARNING, scribus.BUTTON_OK)
 	sys.exit(1)
-hasSpineBackground = False
+
+
 #set units to mm
 scribus.setUnit(1)
 PageX,PageY = scribus.getPageSize()
@@ -33,7 +49,7 @@ curSpineWidth = rightX - leftX - scoringOffset * 2
 spineWidthDiff = newWidth - curSpineWidth
 halfWidthDiff = spineWidthDiff / 2 
 
-pageItems = scribus.getPageItems()
+
 for item in pageItems:
 	if item[0].startswith('spine_background'):
 		X,Y = scribus.getPosition(item[0])
