@@ -89,7 +89,9 @@ for item in pageItems:
 			scribus.moveObject(halfWidthDiff, 0 , item[0])
 	if item[0].startswith('spine_logo'):
 		Xsize,Ysize = scribus.getSize(item[0])
-		newBookX = newWidth - newWidth * 0.2
+		newBookX = newWidth		
+		if newWidth - 2.6 > 2:
+			newBookX = newWidth - 2.6
 		multiplier = newBookX/Xsize
 		newBooKY = Ysize * multiplier
 		scribus.sizeObject(newBookX, newBooKY, item[0])
