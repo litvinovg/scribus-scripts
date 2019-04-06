@@ -5,19 +5,22 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
+
+scoringOffset = 8
+
 try:
     import scribus
 except ImportError:
     print "Unable to import the 'scribus' module. This script will only run within"
     print "the Python interpreter embedded in Scribus. Try Script->Execute Script."
     sys.exit(1)
-newSpineWidth = scribus.valueDialog('Задание ширины корешка','Введите новую ширину корешка')
+newSpineWidth = scribus.valueDialog('Spine width','Set spine width in mm.')
 if newSpineWidth == "0":
-	scribus.messageBox('Ошибка', "Ширина корешка не должна быть нулевой",  scribus.ICON_WARNING, scribus.BUTTON_OK)
+	scribus.messageBox('Error', "Spine width could not be zero.",  scribus.ICON_WARNING, scribus.BUTTON_OK)
 	sys.exit(1)
 newWidth = float(newSpineWidth.replace(',','.'))
 if newWidth < 0:
-	scribus.messageBox('Ошибка', "Ширина корешка не должна быть отрицательной",  scribus.ICON_WARNING, scribus.BUTTON_OK)
+	scribus.messageBox('Error', "Spine width could not be negative",  scribus.ICON_WARNING, scribus.BUTTON_OK)
 	sys.exit(1)
 hasSpineBackground = False
 #set units to mm
@@ -25,7 +28,7 @@ scribus.setUnit(1)
 PageX,PageY = scribus.getPageSize()
 leftX, leftY = scribus.getPosition("left_top_mark")
 rightX, rightY = scribus.getPosition("right_top_mark")
-curSpineWidth = rightX - leftX - 16
+curSpineWidth = rightX - leftX - scoringOffset * 2
 
 spineWidthDiff = newWidth - curSpineWidth
 halfWidthDiff = spineWidthDiff / 2 
