@@ -38,7 +38,6 @@ if newWidth < 0:
 	scribus.messageBox('Error', "Spine width could not be negative",  scribus.ICON_WARNING, scribus.BUTTON_OK)
 	sys.exit(1)
 
-
 #set units to mm
 scribus.setUnit(1)
 PageX,PageY = scribus.getPageSize()
@@ -49,6 +48,8 @@ curSpineWidth = rightX - leftX - scoringOffset * 2
 spineWidthDiff = newWidth - curSpineWidth
 halfWidthDiff = spineWidthDiff / 2 
 
+vGuides = [(PageX/2), (PageX/2 + newWidth/2), (PageX/2 - newWidth/2)]
+hGuides = []
 
 for item in pageItems:
 	if item[0].startswith('spine_background'):
@@ -73,6 +74,10 @@ for item in pageItems:
 			if hasSpineBackground:
 				leftBackgroundSize -=  newWidth/2
 			scribus.sizeObject(leftBackgroundSize, Ysize, item[0])
+		if item[0].startswith('left_top_crop'):
+			newX,newY = scribus.getPosition(item[0])
+			Xsize,Ysize = scribus.getSize(item[0])
+			vGuides.append(newX+Xsize)
 	if item[0].startswith('right_'):
 		if item[0].startswith('right_background'):
 			Xsize,Ysize = scribus.getSize(item[0])
@@ -87,6 +92,14 @@ for item in pageItems:
 			scribus.moveObjectAbs(rightBackgroundX, Y ,item[0])
 		else:
 			scribus.moveObject(halfWidthDiff, 0 , item[0])
+		if item[0].startswith('right_top_crop'):
+			newX,newY = scribus.getPosition(item[0])
+			Xsize,Ysize = scribus.getSize(item[0])
+			vGuides.append(newX)
+			hGuides.append(newY+Ysize)
+		if item[0].startswith('right_bottom_crop'):
+			newX,newY = scribus.getPosition(item[0])
+			hGuides.append(newY)
 	if item[0].startswith('spine_logo'):
 		Xsize,Ysize = scribus.getSize(item[0])
 		newBookX = newWidth		
@@ -97,6 +110,7 @@ for item in pageItems:
 		scribus.sizeObject(newBookX, newBooKY, item[0])
 		scribus.moveObjectAbs(PageX/2 - newBookX/2 , Y ,item[0])
 
-scribus.setVGuides([(PageX/2), (PageX/2 + newWidth/2), (PageX/2 - newWidth/2)])
+scribus.setVGuides(vGuides)
+scribus.setHGuides(hGuides)
 
 
