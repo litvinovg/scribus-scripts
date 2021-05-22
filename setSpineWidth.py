@@ -6,10 +6,11 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-scoringOffset = 8
+defaultScoringOffset = 8
 
 try:
     import scribus
+    import re
 except ImportError:
     print("Unable to import the 'scribus' module. This script will only run within")
     print("the Python interpreter embedded in Scribus. Try Script->Execute Script.")
@@ -18,15 +19,34 @@ except ImportError:
 hasSpineBackground = False
 hasLeftTopMark = False
 hasRightTopMark = False
+leftSpineMarker = None
+rightSpineMarker = None
 pageItems = scribus.getPageItems()
-
 for item in pageItems:
 	if item[0].startswith('left_top_mark'):
 		hasLeftTopMark = True
+		leftSpineMarker = item[0]
 	if item[0].startswith('right_top_mark'):
 		hasRightTopMark = True
+		rightSpineMarker = item[0]
+
+leftOffset = defaultScoringOffset
+rightOffset = defaultScoringOffset
+if leftSpineMarker.startswith('left_top_mark_offset_'):
+	leftOffsetString = leftSpineMarker[len('left_top_mark_offset_'):]
+	if leftOffsetString.endswith('mm'):
+		leftOffsetString = leftOffsetString[:-2]
+	if re.match("\d+(\.\d+)?", leftOffsetString):
+		leftOffset = float(leftOffsetString)
+if rightSpineMarker.startswith('right_top_mark_offset_'):
+	rightOffsetString = rightSpineMarker[len('right_top_mark_offset_'):]
+	if rightOffsetString.endswith('mm'):
+		rightOffsetString = rightOffsetString[:-2]
+	if re.match("\d+(\.\d+)?", rightOffsetString):
+		rightOffset = float(rightOffsetString)
+
 if not hasLeftTopMark or not hasRightTopMark:
-	scribus.messageBox('Error', "Document should have left_top_mark and right_top_mark to measure current spine width. Read more at https://litvinovg.pro/scribus-spine-width.html",  scribus.ICON_WARNING, scribus.BUTTON_OK)
+	scribus.messageBox('Error', "Document should have left_top_mark and right_top_mark or starts with left_top_mark_offset_ and right_top_mark_offset_ with suffix in mm to measure current spine width. Read more at https://litvinovg.pro/scribus-spine-width.html",  scribus.ICON_WARNING, scribus.BUTTON_OK)
 	sys.exit(1)
 
 newSpineWidth = scribus.valueDialog('Spine width','Set spine width in mm.')
@@ -41,9 +61,9 @@ if newWidth < 0:
 #set units to mm
 scribus.setUnit(1)
 PageX,PageY = scribus.getPageSize()
-leftX, leftY = scribus.getPosition("left_top_mark")
-rightX, rightY = scribus.getPosition("right_top_mark")
-curSpineWidth = rightX - leftX - scoringOffset * 2
+leftX, leftY = scribus.getPosition(leftSpineMarker)
+rightX, rightY = scribus.getPosition(rightSpineMarker)
+curSpineWidth = rightX - leftX - leftOffset - rightOffset
 
 spineWidthDiff = newWidth - curSpineWidth
 halfWidthDiff = spineWidthDiff / 2 
@@ -112,5 +132,3 @@ for item in pageItems:
 
 scribus.setVGuides(vGuides)
 scribus.setHGuides(hGuides)
-
-
